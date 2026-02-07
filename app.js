@@ -4,9 +4,11 @@ const app = express();
 const mongoose = require("mongoose");
 const Listing = require("./MODELS/listing");
 const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -16,6 +18,7 @@ async function main() {
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.engine("ejs", ejsMate);
 
 main().then(() => {
     console.log("Connected to MongoDB");
@@ -27,7 +30,7 @@ app.get("/listings", async (req, res) => {
     console.log("Accessing /listings route...");
     const allListings = await Listing.find({});
     console.log("All listings retrieved:", allListings.length);
-    res.render("index", { allListings });
+    res.render("listings/index", { allListings });
 });
 
 //Create Route
@@ -39,7 +42,7 @@ app.post("/listings", async (req, res) => {
 
 //new route
 app.get("/listings/new", (req, res) => {
-    res.render("new.ejs");
+    res.render("listings/new");
 })
 
 //show route 
@@ -47,13 +50,13 @@ app.get("/listings/:id", async (req, res) => {
     console.log("Accessing /listings/:id route...");
     const individualListing = await Listing.findById(req.params.id);
     console.log("Listing retrieved:", individualListing);
-    res.render("show", { listing: individualListing });
+    res.render("listings/show", { listing: individualListing });
 });
 
 //edit route
 app.get("/listings/:id/edit", async (req, res) => {
     const individualListing = await Listing.findById(req.params.id);
-    res.render("edit", { listing: individualListing });
+    res.render("listings/edit", { listing: individualListing });
 });
 
 //Update Route
