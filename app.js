@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 const Listing = require("./MODELS/listing");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const wrapAsync = require("./utils/Wrapasync");
+const ExpressError = require("./utils/Expresserror");
+const joi = require("joi");
+const listingSchema = require("./schema.js");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
@@ -34,11 +38,18 @@ app.get("/listings", async (req, res) => {
 });
 
 //Create Route
-app.post("/listings", async (req, res) => {
-    const newListing = new Listing(req.body);
-    await newListing.save();
-    res.redirect("/listings");
-});
+app.post(
+    "/listings",
+    wrapAsync(async (req, res, next) => {
+        let result=listingSchema.validate(req.body);
+        console.log(result);
+        const newListing = new Listing(req.body.listing);
+        await newListing.save();
+        res.redirect("/listings");
+    })
+);
+
+
 
 //new route
 app.get("/listings/new", (req, res) => {
@@ -94,6 +105,15 @@ app.delete("/listings/:id", async (req, res) => {
 
 app.get("/", (req, res) => {
     res.send("Hi am root");
+})
+
+app.all("*", (req, res, next) => {
+    next(new ExpressError(404, "Page Not Found!"));
+});
+
+app.use((err, req, res, next) => {
+    let { statusCode, message } = err;
+    res.status(statusCode).render("listings/error.ejs", { message });
 })
 
 app.listen(8080, () => {
