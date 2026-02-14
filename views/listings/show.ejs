@@ -1,6 +1,6 @@
 <% layout("/listings/layouts/boilerplate") %>
     <div class="row mt-3">
-        <div class="col-8 offset-2">
+        <div class="col-8 offset-3">
             <h3>
                 <%= listing.title %>
             </h3>
@@ -30,4 +30,135 @@
                 <button class="btn btn-dark offset-5">Delete</button>
             </form>
         </div>
+        <div class="col-6 offset-3 mb-3 review-section">
+            <div class="review-form-container">
+                <h4 class="review-form-title">Leave a Review</h4>
+                <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
+                    <div class="rating-container">
+                        <div class="rating-display">
+                            <span class="rating-emoji" id="ratingEmoji">😐</span>
+                            <div class="rating-text" id="ratingText">Average</div>
+                        </div>
+                        <label for="rating" class="form-label fw-semibold">Rating</label>
+                        <input type="range" min="1" max="5" value="3" id="rating" name="review[rating]"
+                            class="form-range">
+                        <div class="d-flex justify-content-between px-1 text-muted"
+                            style="font-size: 0.85rem; margin-top: 0.5rem;">
+                            <span>1</span>
+                            <span>2</span>
+                            <span>3</span>
+                            <span>4</span>
+                            <span>5</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comment" class="form-label fw-semibold">Your Review</label>
+                        <textarea name="review[comment]" id="comment" cols="30" rows="5"
+                            class="form-control review-textarea" placeholder="Share your experience..."
+                            required></textarea>
+                        <div class="invalid-feedback">
+                            Please submit some comments for review
+                        </div>
+                    </div>
+                    <button class="btn review-submit-btn text-white">Submit Review</button>
+                </form>
+            </div>
+
+            <% if (listing.reviews && listing.reviews.length> 0) { %>
+                <div class="reviews-display-section">
+                    <h4 class="reviews-title">All Reviews</h4>
+                    <div class="reviews-grid">
+                        <% for (let review of listing.reviews) { let emoji='' ; let ratingText='' ;
+                            switch(review.rating) { case 1: emoji='😢' ; ratingText='Poor' ; break; case 2: emoji='😕' ;
+                            ratingText='Fair' ; break; case 3: emoji='😐' ; ratingText='Average' ; break; case 4:
+                            emoji='😊' ; ratingText='Good' ; break; case 5: emoji='😍' ; ratingText='Excellent' ; break;
+                            default: emoji='😐' ; ratingText='Average' ; } %>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="review-rating-display">
+                                        <span class="review-emoji-large">
+                                            <%= emoji %>
+                                        </span>
+                                        <div class="review-stars">
+                                            <% for(let i=1; i <=5; i++) { %>
+                                                <span
+                                                    class="review-star <%= i <= review.rating ? '' : 'empty' %>">★</span>
+                                                <% } %>
+                                        </div>
+                                    </div>
+                                    <span class="review-rating-badge">
+                                        <%= review.rating %>/5
+                                    </span>
+                                </div>
+                                <p class="review-comment">
+                                    <%= review.comment %>
+                                </p>
+                                <div class="review-footer">
+                                    <span class="review-date">
+                                        <%= new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short' ,
+                                            day: 'numeric' , year: 'numeric' }) %>
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="text-muted small">
+                                            <%= ratingText %>
+                                        </span>
+                                        <form method="POST"
+                                            action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                                            class="d-inline">
+                                            <button class="btn btn-sm btn-danger"
+                                                style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } %>
+                    </div>
+                </div>
+                <% } else { %>
+                    <div class="no-reviews">
+                        Be the first to review this listing!
+                    </div>
+                    <% } %>
+        </div>
+
+        <script>
+            // Rating slider emoji update
+            const ratingSlider = document.getElementById('rating');
+            const ratingEmoji = document.getElementById('ratingEmoji');
+            const ratingText = document.getElementById('ratingText');
+
+            const emojiMap = {
+                1: { emoji: '😢', text: 'Poor', color: '#ff6b6b' },
+                2: { emoji: '😕', text: 'Fair', color: '#ffa94d' },
+                3: { emoji: '😐', text: 'Average', color: '#ffd93d' },
+                4: { emoji: '😊', text: 'Good', color: '#a9e34b' },
+                5: { emoji: '😍', text: 'Excellent', color: '#6bcf7f' }
+            };
+
+            ratingSlider.addEventListener('input', function () {
+                const value = this.value;
+                const data = emojiMap[value];
+                ratingEmoji.textContent = data.emoji;
+                ratingText.textContent = data.text;
+                ratingText.style.color = data.color;
+            });
+
+            // Bootstrap form validation
+            (function () {
+                'use strict';
+                const forms = document.querySelectorAll('.needs-validation');
+                Array.from(forms).forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            })();
+        </script>
+
     </div>
