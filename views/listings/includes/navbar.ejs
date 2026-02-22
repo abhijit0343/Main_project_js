@@ -1,17 +1,57 @@
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link" href="/listings">Explore</a>
+        <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i> wanderLust</a>
+
+        <div class="navbar-search-center">
+            <div class="navbar-search-shadow">
+                <div class="search-section">Anywhere</div>
+                <div class="search-divider"></div>
+                <div class="search-section">Any week</div>
+                <div class="search-divider"></div>
+                <div class="search-section add-guests">Add guests</div>
+                <div class="search-icon-container">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
             </div>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link me-4" href="/listings/new">Airbnb your home</a>
-                <a class="nav-link me-4" href="/listings">ALL LISTINGS</a>
-                <a class="nav-link" href="/listings/new">Add New Listing</a>
+        </div>
+
+        <div class="navbar-nav ms-auto user-menu">
+            <a class="nav-link host-link" href="/listings/new">Airbnb your home</a>
+            <div class="nav-icon globe">
+                <i class="fa-solid fa-globe"></i>
+            </div>
+
+            <div class="dropdown profile-dropdown-container">
+                <div class="profile-menu-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-bars hamburger"></i>
+                    <div class="profile-avatar">
+                        <i class="fa-solid fa-circle-user"></i>
+                    </div>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end profile-menu">
+                    <% if (!currentUser) { %>
+                        <li><a class="dropdown-item bold" href="/register">Sign up</a></li>
+                        <li><a class="dropdown-item" href="/login">Log in</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#">Airbnb your home</a></li>
+                        <li><a class="dropdown-item" href="#">Help Centre</a></li>
+                        <% } else { %>
+                            <li><a class="dropdown-item bold" href="#">Messages</a></li>
+                            <li><a class="dropdown-item bold" href="#">Trips</a></li>
+                            <li><a class="dropdown-item bold" href="#">Wishlists</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/listings/new">Airbnb your home</a></li>
+                            <li><a class="dropdown-item" href="#">Account</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/logout">Log out</a></li>
+                            <% } %>
+                </ul>
             </div>
         </div>
     </div>
