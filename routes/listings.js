@@ -20,8 +20,24 @@ const isLoggedIn = (req, res, next) => {
     if (req.isAuthenticated()) {
         return next();
     }
+    req.session.redirectUrl = req.originalUrl; // save intended destination
     req.flash("error", "You must be logged in first!");
     res.redirect("/login");
+};
+
+// ---- Owner Middleware ----
+const isOwner = async (req, res, next) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+    if (!listing) {
+        req.flash("error", "Listing not found!");
+        return res.redirect("/listings");
+    }
+    if (!listing.owner || !listing.owner.equals(req.user._id)) {
+        req.flash("error", "You are not the owner of this listing!");
+        return res.redirect(`/listings/${id}`);
+    }
+    next();
 };
 
 //index route
@@ -40,7 +56,8 @@ router.get("/new", isLoggedIn, (req, res) => {
 //show route 
 router.get("/:id", wrapAsync(async (req, res) => {
     console.log("Accessing /listings/:id route...");
-    const individualListing = await Listing.findById(req.params.id).populate("reviews");
+    const individualListing = await Listing.findById(req.params.id)
+        .populate({ path: "reviews", populate: { path: "author" } });
     if (!individualListing) {
         throw new ExpressError(404, "Listing not found!");
     }
@@ -53,13 +70,14 @@ router.post("/", isLoggedIn, validateListing, wrapAsync(async (req, res, next) =
     let result = listingSchema.validate(req.body);
     console.log(result);
     const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user._id; // assign owner
     await newListing.save();
     req.flash("success", "Listing created successfully!");
     res.redirect("/listings");
 }));
 
-//edit route — login required
-router.get("/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
+//edit route — login required + owner only
+router.get("/:id/edit", isLoggedIn, wrapAsync(isOwner), wrapAsync(async (req, res) => {
     const individualListing = await Listing.findById(req.params.id);
     if (!individualListing) {
         throw new ExpressError(404, "Listing not found!");
@@ -67,15 +85,15 @@ router.get("/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
     res.render("listings/edit", { listing: individualListing });
 }));
 
-//Update Route — login required
-router.put("/:id", isLoggedIn, validateListing, wrapAsync(async (req, res) => {
+//Update Route — login required + owner only
+router.put("/:id", isLoggedIn, wrapAsync(isOwner), validateListing, wrapAsync(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.listing });
     res.redirect(`/listings/${id}`);
 }));
 
-//delete route — login required
-router.delete("/:id", isLoggedIn, wrapAsync(async (req, res) => {
+//delete route — login required + owner only
+router.delete("/:id", isLoggedIn, wrapAsync(isOwner), wrapAsync(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndDelete(id);
     res.redirect("/listings");

@@ -16,43 +16,53 @@
         </div>
 
         <div class="navbar-nav ms-auto user-menu">
-            <a class="nav-link host-link" href="/listings/new">Airbnb your home</a>
-            <div class="nav-icon globe">
-                <i class="fa-solid fa-globe"></i>
-            </div>
+            <% if (currentUser) { %>
+                <span class="nav-link host-link" style="color:#717171; font-weight:500;">
+                    Hi, <strong style="color:#222;"><%- currentUser.username %></strong>
+                </span>
+                <a href="/logout" class="navbar-logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                </a>
+                <% } else { %>
+                    <a class="nav-link host-link" href="/listings/new">Airbnb your home</a>
+                    <% } %>
+                        <div class="nav-icon globe">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
 
-            <div class="dropdown profile-dropdown-container">
-                <div class="profile-menu-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa-solid fa-bars hamburger"></i>
-                    <div class="profile-avatar">
-                        <i class="fa-solid fa-circle-user"></i>
-                    </div>
-                </div>
-                <ul class="dropdown-menu dropdown-menu-end profile-menu">
-                    <% if (!currentUser) { %>
-                        <li><a class="dropdown-item bold" href="/register">Sign up</a></li>
-                        <li><a class="dropdown-item" href="/login">Log in</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Airbnb your home</a></li>
-                        <li><a class="dropdown-item" href="#">Help Centre</a></li>
-                        <% } else { %>
-                            <li><a class="dropdown-item bold" href="#">Messages</a></li>
-                            <li><a class="dropdown-item bold" href="#">Trips</a></li>
-                            <li><a class="dropdown-item bold" href="#">Wishlists</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="/listings/new">Airbnb your home</a></li>
-                            <li><a class="dropdown-item" href="#">Account</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="/logout">Log out</a></li>
-                            <% } %>
-                </ul>
-            </div>
+                        <div class="dropdown profile-dropdown-container">
+                            <div class="profile-menu-btn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-bars hamburger"></i>
+                                <div class="profile-avatar">
+                                    <i class="fa-solid fa-circle-user"></i>
+                                </div>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end profile-menu">
+                                <% if (!currentUser) { %>
+                                    <li><a class="dropdown-item bold" href="/register">Sign up</a></li>
+                                    <li><a class="dropdown-item" href="/login">Log in</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#">Airbnb your home</a></li>
+                                    <li><a class="dropdown-item" href="#">Help Centre</a></li>
+                                    <% } else { %>
+                                        <li><a class="dropdown-item bold" href="#">Messages</a></li>
+                                        <li><a class="dropdown-item bold" href="#">Trips</a></li>
+                                        <li><a class="dropdown-item bold" href="#">Wishlists</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="/listings/new">Airbnb your home</a></li>
+                                        <li><a class="dropdown-item" href="#">Account</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item text-danger fw-semibold" href="/logout">Log out</a>
+                                        </li>
+                                        <% } %>
+                            </ul>
+                        </div>
         </div>
     </div>
 </nav>
