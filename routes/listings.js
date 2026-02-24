@@ -4,6 +4,11 @@ const wrapAsync = require("../utils/Wrapasync");
 const ExpressError = require("../utils/Expresserror");
 const Listing = require("../MODELS/listing");
 const { listingSchema } = require("../schema.js");
+const multer = require("multer");
+const { storage } = require("../cloudConfig.js");
+const upload = multer({ storage });
+const cloudinary = require("cloudinary");
+
 
 const validateListing = (req, res, next) => {
     let { error } = listingSchema.validate(req.body);
@@ -40,63 +45,36 @@ const isOwner = async (req, res, next) => {
     next();
 };
 
+const listingsController = require("../controllers/listings");
+
+router.route("/")
+    .get(wrapAsync(listingsController.index))
+    .post(isLoggedIn, validateListing, wrapAsync(listingsController.createListing));
+
+router.route("/:id")
+    .get(wrapAsync(listingsController.showListing))
+    .put(isLoggedIn, wrapAsync(isOwner), validateListing, wrapAsync(listingsController.updateListing))
+    .delete(isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.destroyListing));
+
 //index route
-router.get("/", wrapAsync(async (req, res) => {
-    console.log("Accessing /listings route...");
-    const allListings = await Listing.find({});
-    console.log("All listings retrieved:", allListings.length);
-    res.render("listings/index", { allListings });
-}));
+router.get("/", wrapAsync(listingsController.index));
 
 //new route — login required
-router.get("/new", isLoggedIn, (req, res) => {
-    res.render("listings/new");
-});
+router.get("/new", isLoggedIn, listingsController.renderNewForm);
 
 //show route 
-router.get("/:id", wrapAsync(async (req, res) => {
-    console.log("Accessing /listings/:id route...");
-    const individualListing = await Listing.findById(req.params.id)
-        .populate({ path: "reviews", populate: { path: "author" } });
-    if (!individualListing) {
-        throw new ExpressError(404, "Listing not found!");
-    }
-    console.log("Listing retrieved:", individualListing);
-    res.render("listings/show", { listing: individualListing });
-}));
+router.get("/:id", wrapAsync(listingsController.showListing));
 
 //Create Route — login required
-router.post("/", isLoggedIn, validateListing, wrapAsync(async (req, res, next) => {
-    let result = listingSchema.validate(req.body);
-    console.log(result);
-    const newListing = new Listing(req.body.listing);
-    newListing.owner = req.user._id; // assign owner
-    await newListing.save();
-    req.flash("success", "Listing created successfully!");
-    res.redirect("/listings");
-}));
+router.post("/", isLoggedIn, validateListing, wrapAsync(listingsController.createListing));
 
 //edit route — login required + owner only
-router.get("/:id/edit", isLoggedIn, wrapAsync(isOwner), wrapAsync(async (req, res) => {
-    const individualListing = await Listing.findById(req.params.id);
-    if (!individualListing) {
-        throw new ExpressError(404, "Listing not found!");
-    }
-    res.render("listings/edit", { listing: individualListing });
-}));
+router.get("/:id/edit", isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.renderEditForm));
 
 //Update Route — login required + owner only
-router.put("/:id", isLoggedIn, wrapAsync(isOwner), validateListing, wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect(`/listings/${id}`);
-}));
+router.put("/:id", isLoggedIn, wrapAsync(isOwner), validateListing, wrapAsync(listingsController.updateListing));
 
 //delete route — login required + owner only
-router.delete("/:id", isLoggedIn, wrapAsync(isOwner), wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
-}));
+router.delete("/:id", isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.destroyListing));
 
 module.exports = router;
