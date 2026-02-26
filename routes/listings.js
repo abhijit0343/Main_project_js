@@ -49,32 +49,17 @@ const listingsController = require("../controllers/listings");
 
 router.route("/")
     .get(wrapAsync(listingsController.index))
-    .post(isLoggedIn, validateListing, wrapAsync(listingsController.createListing));
-
-router.route("/:id")
-    .get(wrapAsync(listingsController.showListing))
-    .put(isLoggedIn, wrapAsync(isOwner), validateListing, wrapAsync(listingsController.updateListing))
-    .delete(isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.destroyListing));
-
-//index route
-router.get("/", wrapAsync(listingsController.index));
+    .post(isLoggedIn, upload.single('listing[image]'), validateListing, wrapAsync(listingsController.createListing));
 
 //new route — login required
 router.get("/new", isLoggedIn, listingsController.renderNewForm);
 
-//show route 
-router.get("/:id", wrapAsync(listingsController.showListing));
-
-//Create Route — login required
-router.post("/", isLoggedIn, validateListing, wrapAsync(listingsController.createListing));
+router.route("/:id")
+    .get(wrapAsync(listingsController.showListing))
+    .put(isLoggedIn, wrapAsync(isOwner), upload.single('listing[image]'), validateListing, wrapAsync(listingsController.updateListing))
+    .delete(isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.destroyListing));
 
 //edit route — login required + owner only
 router.get("/:id/edit", isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.renderEditForm));
-
-//Update Route — login required + owner only
-router.put("/:id", isLoggedIn, wrapAsync(isOwner), validateListing, wrapAsync(listingsController.updateListing));
-
-//delete route — login required + owner only
-router.delete("/:id", isLoggedIn, wrapAsync(isOwner), wrapAsync(listingsController.destroyListing));
 
 module.exports = router;
