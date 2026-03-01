@@ -49,7 +49,7 @@ const listingsController = require("../controllers/listings");
 
 router.route("/")
     .get(wrapAsync(listingsController.index))
-    .post(isLoggedIn, upload.single('listing[image]'), validateListing, wrapAsync(listingsController.createListing));
+    .post(isLoggedIn, upload.single("listing[image]"), validateListing, wrapAsync(listingsController.createListing));
 
 //new route — login required
 router.get("/new", isLoggedIn, listingsController.renderNewForm);

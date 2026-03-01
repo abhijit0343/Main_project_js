@@ -1,4 +1,6 @@
-require("dotenv").config();
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+}
 console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
 console.log("CLOUDINARY_API_KEY starting with:", process.env.CLOUDINARY_API_KEY ? process.env.CLOUDINARY_API_KEY.substring(0, 4) : "undefined");
 
@@ -11,6 +13,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/Expresserror");
 const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -20,10 +23,10 @@ const listings = require("./routes/listings.js");
 const reviews = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const ATLASDB_URL = process.env.ATLASDB_URL;
 
 async function main() {
-    await mongoose.connect(MONGO_URL);
+    await mongoose.connect(ATLASDB_URL);
 }
 
 main().then(() => {
@@ -39,8 +42,21 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
+const storage = MongoStore.create({
+    mongoUrl: ATLASDB_URL,
+    crypto: {
+        secret: process.env.SECRET,
+    },
+    touchAfter: 24 * 60 * 60,
+});
+
+storage.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e);
+});
+
 const sessionOptions = {
-    secret: "mysupersecretcode",
+    store: storage,
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -49,8 +65,6 @@ const sessionOptions = {
         httpOnly: true,
     },
 };
-
-
 app.use(session(sessionOptions));
 app.use(flash());
 
@@ -85,6 +99,7 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("listings/error.ejs", { message });
 });
 
-app.listen(8080, () => {
-    console.log("Server started on port 8080");
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log(`Server started on port ${port}`);
 });

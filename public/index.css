@@ -7,11 +7,15 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f7f7f7;
+  background-color: transparent !important;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
 /* Navbar styles */
@@ -691,10 +695,8 @@ footer {
   height: 100%;
   z-index: -1;
   pointer-events: none;
-  background: transparent;
-  /* allow content to show */
-  opacity: 1;
-  /* clear lines */
+  background: #f7f7f7;
+  /* Move body background here */
 }
 
 /* Brand Text */
@@ -738,4 +740,32 @@ footer {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(254, 66, 77, 0.4);
   color: white !important;
+}
+
+/* Leaflet Map Styles */
+#map {
+  height: 400px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.leaflet-container {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #e0e0e0;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-tip {
+  background-color: white;
+}
+
+.leaflet-popup-tip {
+  background-color: white;
 }

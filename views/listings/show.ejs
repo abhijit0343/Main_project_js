@@ -1,177 +1,166 @@
 <% layout("/listings/layouts/boilerplate") %>
+
     <div class="row mt-3">
-        <div class="col-8 offset-3">
-            <h3>
+        <div class="col-10 offset-1">
+            <h3 class="mb-3">
                 <%= listing.title %>
             </h3>
         </div>
-        <div class="card col-6 offset-3 show-card listing-card">
-            <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image">
-            <div class="card-body">
-                <p class="card-text">
-                    <%= listing.description %>
-                </p>
-                <p class="card-text"> &#8377; <%= listing.price.toLocaleString("en-IN") %>
-                </p>
-                <p class="card-text">
-                    <%= listing.location %>
-                </p>
-                <p class="card-text">
-                    <%= listing.country %>
-                </p>
+
+        <!-- Left Column: Listing Card (Enlarged) -->
+        <div class="col-6 offset-1 listing-details-section">
+            <div class="card show-card listing-card">
+                <img src="<%= listing.image && listing.image.url ? listing.image.url : 'https://via.placeholder.com/300x200?text=No+Image' %>"
+                    class="card-img-top" alt="listing_image" style="height: 500px; object-fit: cover;">
+                <div class="card-body">
+                    <p class="card-text mt-2"><i>Owned by <%= listing.owner ? listing.owner.username : "Anonymous" %>
+                                </i></p>
+                    <p class="card-text">
+                        <%= listing.description %>
+                    </p>
+                    <p class="card-text"> &#8377; <%= listing.price ? listing.price.toLocaleString("en-IN")
+                            : "Price not available" %> night
+                    </p>
+                    <p class="card-text">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <%= listing.location %>, <%= listing.country %>
+                    </p>
+                </div>
+            </div>
+
+            <% if (currentUser && listing.owner && listing.owner.equals(currentUser._id)) { %>
+                <div class="btns mb-4">
+                    <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn px-4">Edit</a>
+                    <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline ms-3">
+                        <button class="btn btn-dark px-4">Delete</button>
+                    </form>
+                </div>
+                <% } %>
+        </div>
+
+        <!-- Right Column: Map (Enlarged) -->
+        <div class="col-5 map-section">
+            <div id="map"
+                style="height: 500px; width: 100%; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);">
+            </div>
+            <div class="mt-3 text-muted">
+                <i class="fa-solid fa-map-location-dot"></i> <b>Location:</b>
+                <%= listing.location %>, <%= listing.country %>
             </div>
         </div>
-        <br />
 
-        <% if (currentUser && listing.owner && listing.owner.equals(currentUser._id)) { %>
-            <div class="btns">
-                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3 edit-btn">Edit</a>
+        <div class="col-10 offset-1">
+            <hr class="my-4">
+        </div>
 
-                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-                    <button class="btn btn-dark offset-5">Delete</button>
-                </form>
-            </div>
-            <% } %>
-                <div class="col-6 offset-3 mb-3 review-section">
-                    <% if (currentUser) { %>
-                        <div class="review-form-container">
-                            <h4 class="review-form-title">Leave a Review</h4>
-                            <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate
-                                class="needs-validation">
-                                <div class="rating-container">
-                                    <div class="rating-display">
-                                        <span class="rating-emoji" id="ratingEmoji">😐</span>
-                                        <div class="rating-text" id="ratingText">Average</div>
-                                    </div>
-                                    <label for="rating" class="form-label fw-semibold">Rating</label>
-                                    <input type="range" min="1" max="5" value="3" id="rating" name="review[rating]"
-                                        class="form-range">
-                                    <div class="d-flex justify-content-between px-1 text-muted"
-                                        style="font-size: 0.85rem; margin-top: 0.5rem;">
-                                        <span>1</span>
-                                        <span>2</span>
-                                        <span>3</span>
-                                        <span>4</span>
-                                        <span>5</span>
+        <!-- Bottom Section: Reviews (Wider) -->
+        <div class="col-10 offset-1 mb-5 review-section">
+            <% if (currentUser) { %>
+                <div class="review-form-container">
+                    <h4 class="review-form-title">Leave a Review</h4>
+                    <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate
+                        class="needs-validation">
+                        <div class="mb-3 mt-3">
+                            <label for="rating" class="form-label d-flex align-items-center">
+                                Rating: &nbsp; <span id="ratingEmoji"
+                                    style="font-size: 1.5rem; margin-right: 8px;">😐</span>
+                                <span id="ratingText" style="font-weight: 600; color: #ffd93d;">Average</span>
+                            </label>
+                            <input type="range" min="1" max="5" name="review[rating]" id="rating"
+                                class="form-range custom-range">
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="comment" class="form-label">Comments</label>
+                            <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control"
+                                required placeholder="Tell us about your stay..."></textarea>
+                            <div class="invalid-feedback">Please submit some comments for review</div>
+                        </div>
+                        <button class="btn btn-outline-dark mb-3 px-4">Submit Review</button>
+                    </form>
+                </div>
+                <hr class="my-4">
+                <% } %>
+
+                    <% if (listing.reviews.length> 0) { %>
+                        <div class="row">
+                            <p class="mb-4"><b>All Reviews (<%= listing.reviews.length %>)</b></p>
+                            <% for (let review of listing.reviews) { %>
+                                <div class="card col-5 ms-3 mb-4 review-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@<%= review.author ? review.author.username : "anonymous"
+                                                %>
+                                        </h5>
+                                        <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
+                                        <p class="card-text">
+                                            <%= review.comment %>
+                                        </p>
+                                        <form class="mb-3" method="POST"
+                                            action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                                            <% if (currentUser && review.author &&
+                                                review.author.equals(currentUser._id)) { %>
+                                                <button class="btn btn-sm btn-dark">Delete</button>
+                                                <% } %>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="comment" class="form-label fw-semibold">Your Review</label>
-                                    <textarea name="review[comment]" id="comment" cols="30" rows="5"
-                                        class="form-control review-textarea" placeholder="Share your experience..."
-                                        required></textarea>
-                                    <div class="invalid-feedback">
-                                        Please submit some comments for review
-                                    </div>
-                                </div>
-                                <button class="btn review-submit-btn text-white">Submit Review</button>
-                            </form>
+                                <% } %>
                         </div>
                         <% } else { %>
-                            <div class="no-reviews" style="margin-bottom:1rem;">
-                                <a href="/login">Log in</a> to leave a review.
-                            </div>
+                            <p class="text-muted">No reviews yet. Be the first to review!</p>
                             <% } %>
+        </div>
 
-                                <% if (listing.reviews && listing.reviews.length> 0) { %>
-                                    <div class="reviews-display-section">
-                                        <h4 class="reviews-title">All Reviews</h4>
-                                        <div class="reviews-grid">
-                                            <% for (let review of listing.reviews) { let emoji='' ; let ratingText='' ;
-                                                switch(review.rating) { case 1: emoji='😢' ; ratingText='Poor' ; break;
-                                                case 2: emoji='😕' ; ratingText='Fair' ; break; case 3: emoji='😐' ;
-                                                ratingText='Average' ; break; case 4: emoji='😊' ; ratingText='Good' ;
-                                                break; case 5: emoji='😍' ; ratingText='Excellent' ; break; default:
-                                                emoji='😐' ; ratingText='Average' ; } %>
-                                                <div class="review-card">
-                                                    <div class="review-header">
-                                                        <div class="review-rating-display">
-                                                            <span class="review-emoji-large">
-                                                                <%= emoji %>
-                                                            </span>
-                                                            <div class="review-stars">
-                                                                <% for(let i=1; i <=5; i++) { %>
-                                                                    <span
-                                                                        class="review-star <%= i <= review.rating ? '' : 'empty' %>">★</span>
-                                                                    <% } %>
-                                                            </div>
-                                                        </div>
-                                                        <span class="review-rating-badge">
-                                                            <%= review.rating %>/5
-                                                        </span>
-                                                    </div>
-                                                    <p class="review-comment">
-                                                        <%= review.comment %>
-                                                    </p>
-                                                    <div class="review-footer">
-                                                        <span class="review-date">
-                                                            <%= new Date(review.createdAt).toLocaleDateString('en-US', {
-                                                                month: 'short' , day: 'numeric' , year: 'numeric' }) %>
-                                                        </span>
-                                                        <div class="d-flex align-items-center gap-2">
-                                                            <span class="text-muted small">
-                                                                <%= ratingText %>
-                                                            </span>
-                                                            <% if (currentUser && review.author &&
-                                                                review.author._id.equals(currentUser._id)) { %>
-                                                                <form method="POST"
-                                                                    action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
-                                                                    class="d-inline">
-                                                                    <button class="btn btn-sm btn-danger"
-                                                                        style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">
-                                                                        <i class="fas fa-trash-alt"></i>
-                                                                    </button>
-                                                                </form>
-                                                                <% } %>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <% } %>
-                                        </div>
-                                    </div>
-                                    <% } else { %>
-                                        <div class="no-reviews">
-                                            Be the first to review this listing!
-                                        </div>
-                                        <% } %>
-                </div>
+        <script>
+            const ratingSlider = document.getElementById('rating');
+            const ratingEmoji = document.getElementById('ratingEmoji');
+            const ratingText = document.getElementById('ratingText');
 
-                <script>
-                    // Rating slider emoji update
-                    const ratingSlider = document.getElementById('rating');
-                    const ratingEmoji = document.getElementById('ratingEmoji');
-                    const ratingText = document.getElementById('ratingText');
+            const emojiMap = {
+                1: { emoji: '😢', text: 'Poor', color: '#ff6b6b' },
+                2: { emoji: '😕', text: 'Fair', color: '#ffa94d' },
+                3: { emoji: '😐', text: 'Average', color: '#ffd93d' },
+                4: { emoji: '😊', text: 'Good', color: '#a9e34b' },
+                5: { emoji: '😍', text: 'Excellent', color: '#6bcf7f' }
+            };
 
-                    const emojiMap = {
-                        1: { emoji: '😢', text: 'Poor', color: '#ff6b6b' },
-                        2: { emoji: '😕', text: 'Fair', color: '#ffa94d' },
-                        3: { emoji: '😐', text: 'Average', color: '#ffd93d' },
-                        4: { emoji: '😊', text: 'Good', color: '#a9e34b' },
-                        5: { emoji: '😍', text: 'Excellent', color: '#6bcf7f' }
-                    };
-
-                    ratingSlider.addEventListener('input', function () {
-                        const value = this.value;
-                        const data = emojiMap[value];
+            if (ratingSlider) {
+                ratingSlider.addEventListener('input', function () {
+                    const value = this.value;
+                    const data = emojiMap[value];
+                    if (data) {
                         ratingEmoji.textContent = data.emoji;
                         ratingText.textContent = data.text;
                         ratingText.style.color = data.color;
-                    });
+                    }
+                });
+            }
+        </script>
 
-                    // Bootstrap form validation
-                    (function () {
-                        'use strict';
-                        const forms = document.querySelectorAll('.needs-validation');
-                        Array.from(forms).forEach(function (form) {
-                            form.addEventListener('submit', function (event) {
-                                if (!form.checkValidity()) {
-                                    event.preventDefault();
-                                    event.stopPropagation();
-                                }
-                                form.classList.add('was-validated');
-                            }, false);
-                        });
-                    })();
-                </script>
+        <script>
+            const loc = "<%= listing.location %>, <%= listing.country %>";
 
+            // Initialize the map with a neutral world view
+            let map = L.map('map').setView([20, 0], 2);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; Wanderlust Map'
+            }).addTo(map);
+
+            // Client-side geocoding logic
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(loc)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = data[0].lat;
+                        const lon = data[0].lon;
+                        map.setView([lat, lon], 12);
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup(`<b>${loc}</b><br/>Exact location provided after booking.`)
+                            .openPopup();
+                    } else {
+                        console.log("Location not found for:", loc);
+                    }
+                })
+                .catch(err => console.error("Geocoding fetch error:", err));
+        </script>
     </div>

@@ -20,8 +20,20 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="image" class="form-label">Current Image</label>
+                    <% if(listing.image && listing.image.url) { %>
+                        <div class="mb-2">
+                            <img src="<%= listing.image.url %>" alt="current_listing_image" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No image uploaded yet</p>
+                    <% } %>
+                </div>
+
+                <div class="mb-3">
                     <label for="image" class="form-label">Upload New Image</label>
                     <input name="listing[image]" type="file" class="form-control" />
+                    <small class="text-muted">Leave blank to keep the current image</small>
                 </div>
 
                 <div class="row">

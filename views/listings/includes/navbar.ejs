@@ -3,16 +3,15 @@
         <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i> wanderLust</a>
 
         <div class="navbar-search-center">
-            <div class="navbar-search-shadow">
-                <div class="search-section">Anywhere</div>
-                <div class="search-divider"></div>
-                <div class="search-section">Any week</div>
-                <div class="search-divider"></div>
-                <div class="search-section add-guests">Add guests</div>
-                <div class="search-icon-container">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+            <form action="/listings" method="GET" class="search-form">
+                <div class="navbar-search-shadow">
+                    <input name="q" class="search-input" placeholder="Search destinations" type="text"
+                        style="border: none; outline: none; background: transparent; width: 250px; font-size: 14px; font-weight: 500;">
+                    <button type="submit" class="search-icon-container" style="border: none; cursor: pointer;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
 
         <div class="navbar-nav ms-auto user-menu">
